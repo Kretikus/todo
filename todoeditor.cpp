@@ -24,8 +24,7 @@ ToDoEditor::ToDoEditor(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    auto file = getTodoFile();
-    ui->todoEdit->setPlainText(QString::fromUtf8(file->readAll()));
+    loadLocal();
 }
 
 ToDoEditor::~ToDoEditor()
@@ -34,19 +33,34 @@ ToDoEditor::~ToDoEditor()
     delete ui;
 }
 
-void ToDoEditor::onClose()
+
+void ToDoEditor::saveLocal()
 {
+    qDebug() << "Saving file to disk";
     auto file = getTodoFile(false);
     file->resize(0);
     const auto plainText = ui->todoEdit->toPlainText();
     file->write(plainText.toUtf8());
-
 }
 
-void ToDoEditor::showAndRaise()
+void ToDoEditor::loadLocal()
 {
-    activateWindow();
-    show();
+    qDebug() << "Reading file from disk";
+    auto file = getTodoFile();
+    ui->todoEdit->setPlainText(QString::fromUtf8(file->readAll()));
+}
+
+void ToDoEditor::onClose()
+{
+    saveLocal();
+}
+
+void ToDoEditor::showAndRaise(QSystemTrayIcon::ActivationReason reason)
+{
+    if (reason == QSystemTrayIcon::DoubleClick) {
+        activateWindow();
+        show();
+    }
 }
 
 void ToDoEditor::saveRemote()
@@ -74,6 +88,7 @@ void ToDoEditor::saveRemote()
 void ToDoEditor::loadRemote()
 {
     QSettings settings;
+
     const auto remotePath = settings.value("remote/todoRemotePath", "").toString();
     const auto remoteFile = settings.value("remote/todoRemoteFilename", "").toString();
 
@@ -87,7 +102,7 @@ void ToDoEditor::loadRemote()
     const auto text = QString::fromUtf8(reply->readAll());
     qDebug() << text;
     ui->todoEdit->setPlainText(text);
-	reply->deleteLater();
+    reply->deleteLater();
 }
 
 void ToDoEditor::closeEvent(QCloseEvent *)

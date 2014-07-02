@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QNetworkAccessManager>
+#include <QSystemTrayIcon>
 
 namespace Ui {
 class ToDoEditor;
@@ -16,11 +17,14 @@ public:
     explicit ToDoEditor(QWidget *parent = 0);
     ~ToDoEditor();
 
+    void saveLocal();
+    void loadLocal();
+
 private Q_SLOTS:
     void onClose();
 
 public Q_SLOTS:
-    void showAndRaise();
+    void showAndRaise(QSystemTrayIcon::ActivationReason);
     void saveRemote();
     void loadRemote();
 
