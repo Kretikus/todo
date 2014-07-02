@@ -24,6 +24,9 @@ public Q_SLOTS:
     void saveRemote();
     void loadRemote();
 
+protected:
+    virtual void closeEvent(QCloseEvent *);
+
 private:
     Ui::ToDoEditor *ui;
     QNetworkAccessManager mgr_;

@@ -8,6 +8,7 @@
 #include <QStandardPaths>
 #include <QTimer>
 #include <QUrlQuery>
+#include <QSettings>
 
 QSharedPointer<QFile> getTodoFile(bool openReadOnly = true)
 {
@@ -50,12 +51,16 @@ void ToDoEditor::showAndRaise()
 
 void ToDoEditor::saveRemote()
 {
-    QNetworkRequest req(QUrl(""));
+    QSettings settings;
+    const auto remotePath = settings.value("remote/todoRemotePath", "").toString();
+    const auto remoteFile = settings.value("remote/todoRemoteFilename", "").toString();
+
+    QNetworkRequest req(QUrl(remotePath + "/todo.php"));
 
     QByteArray data;
 
     QUrlQuery query;
-    query.addQueryItem("filename", "todo.txt");
+    query.addQueryItem("filename", remoteFile);
     query.addQueryItem("content", ui->todoEdit->toPlainText());
 
     QNetworkReply * reply = mgr_.put(req, query.toString().toUtf8());
@@ -63,11 +68,16 @@ void ToDoEditor::saveRemote()
         qApp->processEvents();
     }
     qDebug() << QString::fromLatin1(reply->readAll());
+    reply->deleteLater();
 }
 
 void ToDoEditor::loadRemote()
 {
-    QNetworkRequest req(QUrl(""));
+    QSettings settings;
+    const auto remotePath = settings.value("remote/todoRemotePath", "").toString();
+    const auto remoteFile = settings.value("remote/todoRemoteFilename", "").toString();
+
+    QNetworkRequest req(QUrl(remotePath + "/" + remoteFile));
 
     QNetworkReply * reply = mgr_.get(req);
     while (reply->isRunning()) {
@@ -77,5 +87,11 @@ void ToDoEditor::loadRemote()
     const auto text = QString::fromUtf8(reply->readAll());
     qDebug() << text;
     ui->todoEdit->setPlainText(text);
+	reply->deleteLater();
+}
+
+void ToDoEditor::closeEvent(QCloseEvent *)
+{
+    onClose();
 }
 

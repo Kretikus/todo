@@ -8,6 +8,10 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     a.setQuitOnLastWindowClosed(false);
 
+    QCoreApplication :: setOrganizationName ("RomanHimmesSoft");
+    QCoreApplication :: setOrganizationDomain ("www.himmes.com");
+    QCoreApplication :: setApplicationName ("ToDo");
+
     ToDoEditor w;
     w.setAttribute(Qt::WA_DeleteOnClose, false);
 
